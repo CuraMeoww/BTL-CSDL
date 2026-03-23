@@ -2,39 +2,129 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Web Đầu Tiên</title>
+    <title>Trình Quản Lý SQLite Web</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 40px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 { color: #333; }
-        p { color: #666; }
+        body { font-family: sans-serif; margin: 20px; line-height: 1.6; }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .controls { margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; }
+        button { padding: 10px 15px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 3px; }
+        button:hover { background: #218838; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Chào mừng bạn đến với trang web của tôi!</h1>
-        <p>Đây là một ví dụ về cấu trúc HTML cơ bản nhất.</p>
-        
-        <ul>
-            <li>Học HTML rất thú vị.</li>
-            <li>Bạn có thể thêm CSS để làm đẹp.</li>
-            <li>Và thêm JavaScript để tạo tương tác.</li>
-        </ul>
+    <h2>Trình Truy Vấn SQL Trực Tuyến</h2>
 
-        <button onclick="alert('Chào bạn!')">Nhấn vào đây nè</button>
+    <div class="controls">
+        <p>1. Khởi tạo/Tải file: 
+            <input type="file" id="upload" accept=".db,.sqlite">
+            <button onclick="downloadDB()">Tải file .db về máy</button>
+        </p>
     </div>
+
+    <div class="editor">
+        <p>2. Nhập lệnh SQL (CREATE, INSERT, SELECT...):</p>
+        <textarea id="commands" placeholder="CREATE TABLE users (id INTEGER, name TEXT);
+INSERT INTO users VALUES (1, 'Gemini');
+SELECT * FROM users;"></textarea>
+        <button onclick="executeSQL()">Thực thi lệnh</button>
+    </div>
+
+    <div id="output">
+        <p>3. Kết quả truy vấn:</p>
+        <div id="resultTable"></div>
+    </div>
+
+    <script>
+        let db;
+        let SQL;
+
+        // Khởi tạo SQL.js
+        const config = {
+            locateFile: filename => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${filename}`
+        };
+
+        initSqlJs(config).then(function(sql){
+            SQL = sql;
+            db = new SQL.Database(); // Tạo một database trống trong bộ nhớ (RAM)
+            console.log("Database đã sẵn sàng.");
+        });
+
+        // Hàm thực thi SQL
+        function executeSQL() {
+            const sqlCommands = document.getElementById('commands').value;
+            try {
+                const res = db.exec(sqlCommands);
+                displayResults(res);
+            } catch (err) {
+                alert("Lỗi SQL: " + err.message);
+            }
+        }
+
+        // Hiển thị kết quả ra bảng
+        function displayResults(results) {
+            const resultDiv = document.getElementById('resultTable');
+            resultDiv.innerHTML = ""; // Xóa kết quả cũ
+
+            results.forEach(result => {
+                const table = document.createElement('table');
+                const thead = document.createElement('thead');
+                const tbody = document.createElement('tbody');
+
+                // Tạo header
+                const headerRow = document.createElement('tr');
+                result.columns.forEach(col => {
+                    const th = document.createElement('th');
+                    th.textContent = col;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+
+                // Tạo dữ liệu
+                result.values.forEach(row => {
+                    const tr = document.createElement('tr');
+                    row.forEach(cell => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+
+                table.appendChild(thead);
+                table.appendChild(tbody);
+                resultDiv.appendChild(table);
+            });
+        }
+
+        // Xử lý khi upload file .db có sẵn
+        document.getElementById('upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function() {
+                const Uints = new Uint8Array(reader.result);
+                db = new SQL.Database(Uints);
+                alert("Đã tải dữ liệu từ file!");
+            }
+            reader.readAsArrayBuffer(file);
+        }, false);
+
+        // Hàm tải database về máy dưới dạng file .db
+        function downloadDB() {
+            const data = db.export();
+            const arraybuffer = new Uint8Array(data);
+            const blob = new Blob([arraybuffer], {type: "application/x-sqlite3"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "my_database.db";
+            a.click();
+        }
+    </script>
 
 </body>
 </html>
