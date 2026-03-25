@@ -2,129 +2,117 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Trình Quản Lý SQLite Web</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Cửa Hàng Quần Áo - Demo BTL</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; line-height: 1.6; }
-        textarea { width: 100%; height: 100px; margin-bottom: 10px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        .controls { margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; }
-        button { padding: 10px 15px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 3px; }
-        button:hover { background: #218838; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background-color: #f8f9fa; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        .form-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; background: #e9ecef; padding: 15px; border-radius: 8px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-width: 150px; }
+        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        .btn-add { background-color: #28a745; color: white; }
+        .btn-add:hover { background-color: #218838; }
+        .btn-delete { background-color: #dc3545; color: white; padding: 5px 10px; }
+        .btn-delete:hover { background-color: #c82333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
 
-    <h2>Trình Truy Vấn SQL Trực Tuyến</h2>
-
-    <div class="controls">
-        <p>1. Khởi tạo/Tải file: 
-            <input type="file" id="upload" accept=".db,.sqlite">
-            <button onclick="downloadDB()">Tải file .db về máy</button>
-        </p>
+<div class="container">
+    <h2>HỆ THỐNG QUẢN LÝ CỬA HÀNG QUẦN ÁO</h2>
+    
+    <!-- Form nhập liệu -->
+    <div class="form-group">
+        <input type="text" id="tenSP" placeholder="Tên sản phẩm (VD: Áo thun)">
+        <input type="number" id="giaBan" placeholder="Giá bán (VNĐ)">
+        <input type="text" id="maNCC" placeholder="Mã nhà cung cấp">
+        <button class="btn-add" onclick="addProduct()">THÊM MỚI</button>
     </div>
 
-    <div class="editor">
-        <p>2. Nhập lệnh SQL (CREATE, INSERT, SELECT...):</p>
-        <textarea id="commands" placeholder="CREATE TABLE users (id INTEGER, name TEXT);
-INSERT INTO users VALUES (1, 'Gemini');
-SELECT * FROM users;"></textarea>
-        <button onclick="executeSQL()">Thực thi lệnh</button>
-    </div>
+    <!-- Bảng hiển thị -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên Sản Phẩm</th>
+                <th>Giá Bán</th>
+                <th>Mã NCC</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody id="productData">
+            <!-- Dữ liệu sẽ tự động đổ vào đây -->
+        </tbody>
+    </table>
+</div>
 
-    <div id="output">
-        <p>3. Kết quả truy vấn:</p>
-        <div id="resultTable"></div>
-    </div>
+<script>
+    // Link API của bạn (Đã bỏ :endpoint)
+    const apiURL = 'https://69c3d640b780a9ba03e814bf.mockapi.io/SANPHAM';
 
-    <script>
-        let db;
-        let SQL;
+    // 1. Hàm Lấy dữ liệu (READ)
+    async function loadProducts() {
+        const res = await fetch(apiURL);
+        const data = await res.json();
+        const tbody = document.getElementById('productData');
+        tbody.innerHTML = ''; 
 
-        // Khởi tạo SQL.js
-        const config = {
-            locateFile: filename => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${filename}`
+        data.forEach(item => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.TenSP}</td>
+                    <td>${Number(item.GiaBan).toLocaleString()} VNĐ</td>
+                    <td>${item.MaNCC}</td>
+                    <td><button class="btn-delete" onclick="deleteProduct('${item.id}')">Xóa</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    // 2. Hàm Thêm dữ liệu (CREATE)
+    async function addProduct() {
+        const ten = document.getElementById('tenSP').value;
+        const gia = document.getElementById('giaBan').value;
+        const ncc = document.getElementById('maNCC').value;
+
+        if(!ten || !gia) return alert("Vui lòng nhập đủ tên và giá!");
+
+        const newProduct = {
+            TenSP: ten,
+            GiaBan: gia,
+            MaNCC: ncc
         };
 
-        initSqlJs(config).then(function(sql){
-            SQL = sql;
-            db = new SQL.Database(); // Tạo một database trống trong bộ nhớ (RAM)
-            console.log("Database đã sẵn sàng.");
+        await fetch(apiURL, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(newProduct)
         });
 
-        // Hàm thực thi SQL
-        function executeSQL() {
-            const sqlCommands = document.getElementById('commands').value;
-            try {
-                const res = db.exec(sqlCommands);
-                displayResults(res);
-            } catch (err) {
-                alert("Lỗi SQL: " + err.message);
-            }
+        // Xóa form và nạp lại bảng
+        document.getElementById('tenSP').value = '';
+        document.getElementById('giaBan').value = '';
+        document.getElementById('maNCC').value = '';
+        loadProducts();
+    }
+
+    // 3. Hàm Xóa dữ liệu (DELETE)
+    async function deleteProduct(id) {
+        if(confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+            await fetch(`${apiURL}/${id}`, { method: 'DELETE' });
+            loadProducts();
         }
+    }
 
-        // Hiển thị kết quả ra bảng
-        function displayResults(results) {
-            const resultDiv = document.getElementById('resultTable');
-            resultDiv.innerHTML = ""; // Xóa kết quả cũ
-
-            results.forEach(result => {
-                const table = document.createElement('table');
-                const thead = document.createElement('thead');
-                const tbody = document.createElement('tbody');
-
-                // Tạo header
-                const headerRow = document.createElement('tr');
-                result.columns.forEach(col => {
-                    const th = document.createElement('th');
-                    th.textContent = col;
-                    headerRow.appendChild(th);
-                });
-                thead.appendChild(headerRow);
-
-                // Tạo dữ liệu
-                result.values.forEach(row => {
-                    const tr = document.createElement('tr');
-                    row.forEach(cell => {
-                        const td = document.createElement('td');
-                        td.textContent = cell;
-                        tr.appendChild(td);
-                    });
-                    tbody.appendChild(tr);
-                });
-
-                table.appendChild(thead);
-                table.appendChild(tbody);
-                resultDiv.appendChild(table);
-            });
-        }
-
-        // Xử lý khi upload file .db có sẵn
-        document.getElementById('upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function() {
-                const Uints = new Uint8Array(reader.result);
-                db = new SQL.Database(Uints);
-                alert("Đã tải dữ liệu từ file!");
-            }
-            reader.readAsArrayBuffer(file);
-        }, false);
-
-        // Hàm tải database về máy dưới dạng file .db
-        function downloadDB() {
-            const data = db.export();
-            const arraybuffer = new Uint8Array(data);
-            const blob = new Blob([arraybuffer], {type: "application/x-sqlite3"});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "my_database.db";
-            a.click();
-        }
-    </script>
+    // Tự động chạy khi mở web
+    loadProducts();
+</script>
 
 </body>
 </html>
