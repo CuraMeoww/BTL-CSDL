@@ -3,115 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Cửa Hàng Quần Áo - Demo BTL</title>
+    <title>Quản Lý Cửa Hàng Quần Áo</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background-color: #f8f9fa; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #333; }
-        .form-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; background: #e9ecef; padding: 15px; border-radius: 8px; }
-        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-width: 150px; }
-        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; transition: 0.3s; }
-        .btn-add { background-color: #28a745; color: white; }
-        .btn-add:hover { background-color: #218838; }
-        .btn-delete { background-color: #dc3545; color: white; padding: 5px 10px; }
-        .btn-delete:hover { background-color: #c82333; }
+        .form-group { margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; flex: 1; min-width: 150px; }
+        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #218838; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
         th { background-color: #007bff; color: white; }
         tr:nth-child(even) { background-color: #f2f2f2; }
+        .btn-delete { background-color: #dc3545; }
+        .btn-delete:hover { background-color: #c82333; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>HỆ THỐNG QUẢN LÝ CỬA HÀNG QUẦN ÁO</h2>
+    <h2>Hệ Thống Quản Lý Kho Quần Áo</h2>
     
-    <!-- Form nhập liệu -->
     <div class="form-group">
-        <input type="text" id="tenSP" placeholder="Tên sản phẩm (VD: Áo thun)">
-        <input type="number" id="giaBan" placeholder="Giá bán (VNĐ)">
-        <input type="text" id="maNCC" placeholder="Mã nhà cung cấp">
-        <button class="btn-add" onclick="addProduct()">THÊM MỚI</button>
+        <input type="text" id="itemName" placeholder="Tên sản phẩm (VD: Áo thun Polo)">
+        <select id="itemCategory">
+            <option value="Áo">Áo</option>
+            <option value="Quần">Quần</option>
+            <option value="Váy">Váy</option>
+            <option value="Phụ kiện">Phụ kiện</option>
+        </select>
+        <input type="number" id="itemPrice" placeholder="Giá bán (VNĐ)">
+        <input type="number" id="itemStock" placeholder="Số lượng tồn kho">
+        <button onclick="addItem()">Thêm Sản Phẩm</button>
     </div>
 
-    <!-- Bảng hiển thị -->
-    <table>
+    <table id="inventoryTable">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Tên Sản Phẩm</th>
-                <th>Giá Bán</th>
-                <th>Mã NCC</th>
+                <th>Tên sản phẩm</th>
+                <th>Loại</th>
+                <th>Giá (VNĐ)</th>
+                <th>Tồn kho</th>
                 <th>Thao tác</th>
             </tr>
         </thead>
-        <tbody id="productData">
-            <!-- Dữ liệu sẽ tự động đổ vào đây -->
+        <tbody id="inventoryBody">
+            <!-- Dữ liệu sẽ đổ vào đây -->
         </tbody>
     </table>
 </div>
 
 <script>
-    // Link API của bạn (Đã bỏ :endpoint)
-    const apiURL = 'https://69c3d640b780a9ba03e814bf.mockapi.io/SANPHAM';
+    let inventory = JSON.parse(localStorage.getItem('clothing_db')) || [
+        { id: 1, name: 'Sơ mi trắng Slimfit', category: 'Áo', price: 250000, stock: 50 },
+        { id: 2, name: 'Quần Jean Denim', category: 'Quần', price: 450000, stock: 30 }
+    ];
 
-    // 1. Hàm Lấy dữ liệu (READ)
-    async function loadProducts() {
-        const res = await fetch(apiURL);
-        const data = await res.json();
-        const tbody = document.getElementById('productData');
-        tbody.innerHTML = ''; 
-
-        data.forEach(item => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${item.id}</td>
-                    <td>${item.TenSP}</td>
-                    <td>${Number(item.GiaBan).toLocaleString()} VNĐ</td>
-                    <td>${item.MaNCC}</td>
-                    <td><button class="btn-delete" onclick="deleteProduct('${item.id}')">Xóa</button></td>
-                </tr>
-            `;
+    function renderTable() {
+        const tbody = document.getElementById('inventoryBody');
+        tbody.innerHTML = '';
+        inventory.forEach((item, index) => {
+            const row = `<tr>
+                <td>${item.id}</td>
+                <td>${item.name}</td>
+                <td>${item.category}</td>
+                <td>${item.price.toLocaleString()}</td>
+                <td>${item.stock}</td>
+                <td><button class="btn-delete" onclick="deleteItem(${index})">Xóa</button></td>
+            </tr>`;
+            tbody.innerHTML += row;
         });
+        localStorage.setItem('clothing_db', JSON.stringify(inventory));
     }
 
-    // 2. Hàm Thêm dữ liệu (CREATE)
-    async function addProduct() {
-        const ten = document.getElementById('tenSP').value;
-        const gia = document.getElementById('giaBan').value;
-        const ncc = document.getElementById('maNCC').value;
+    function addItem() {
+        const name = document.getElementById('itemName').value;
+        const category = document.getElementById('itemCategory').value;
+        const price = document.getElementById('itemPrice').value;
+        const stock = document.getElementById('itemStock').value;
 
-        if(!ten || !gia) return alert("Vui lòng nhập đủ tên và giá!");
-
-        const newProduct = {
-            TenSP: ten,
-            GiaBan: gia,
-            MaNCC: ncc
-        };
-
-        await fetch(apiURL, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(newProduct)
-        });
-
-        // Xóa form và nạp lại bảng
-        document.getElementById('tenSP').value = '';
-        document.getElementById('giaBan').value = '';
-        document.getElementById('maNCC').value = '';
-        loadProducts();
-    }
-
-    // 3. Hàm Xóa dữ liệu (DELETE)
-    async function deleteProduct(id) {
-        if(confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-            await fetch(`${apiURL}/${id}`, { method: 'DELETE' });
-            loadProducts();
+        if (name && price && stock) {
+            const newItem = {
+                id: inventory.length > 0 ? inventory[inventory.length - 1].id + 1 : 1,
+                name,
+                category,
+                price: parseInt(price),
+                stock: parseInt(stock)
+            };
+            inventory.push(newItem);
+            renderTable();
+            clearInputs();
+        } else {
+            alert("Vui lòng nhập đầy đủ thông tin!");
         }
     }
 
-    // Tự động chạy khi mở web
-    loadProducts();
+    function deleteItem(index) {
+        if(confirm("Xác nhận xóa sản phẩm này?")) {
+            inventory.splice(index, 1);
+            renderTable();
+        }
+    }
+
+    function clearInputs() {
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemPrice').value = '';
+        document.getElementById('itemStock').value = '';
+    }
+
+    // Khởi tạo bảng lần đầu
+    renderTable();
 </script>
 
 </body>
