@@ -2,192 +2,214 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Cửa Hàng Quần Áo - Demo BTL</title>
+    <title>Hệ Thống Quản Lý Cửa Hàng - Lưu Trữ Dữ Liệu</title>
     <style>
-        :root { --primary-color: #2c3e50; --secondary-color: #34495e; --accent-color: #27ae60; --danger-color: #e74c3c; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ecf0f1; margin: 0; padding: 20px; }
-       .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: var(--primary-color); text-transform: uppercase; }
-       .nav-buttons { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
-        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; font-weight: bold; }
-       .btn-nav { background-color: var(--secondary-color); color: white; }
-       .btn-nav.active { background-color: var(--accent-color); }
-       .btn-add { background-color: var(--accent-color); color: white; margin-bottom: 15px; }
-       .btn-delete { background-color: var(--danger-color); color: white; padding: 5px 10px; }
+        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --danger: #e74c3c; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; display: flex; background: #f4f7f6; height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--primary); color: white; display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
+        .sidebar h2 { padding: 25px; text-align: center; background: #1a252f; margin: 0; font-size: 1.2em; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-item { padding: 18px 25px; cursor: pointer; transition: 0.3s; border-left: 5px solid transparent; display: flex; align-items: center; gap: 10px; }
+        .nav-item:hover, .nav-item.active { background: #34495e; border-left: 5px solid var(--accent); }
+
+        /* Main Content */
+        .content { flex: 1; padding: 30px; overflow-y: auto; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { margin-top: 0; color: #2c3e50; font-size: 1.5em; border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px; }
+
+        /* Form Nhập liệu */
+        .form-container { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #eee; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--accent); }
+        
+        /* Nút bấm */
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
+        .btn-add { background: var(--success); }
+        .btn-del { background: var(--danger); padding: 5px 10px; font-size: 12px; }
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+
+        /* Bảng */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #bdc3c7; padding: 12px; text-align: left; }
-        th { background-color: #f8f9fa; color: var(--primary-color); }
-       .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-       .modal-content { background: white; margin: 5% auto; padding: 25px; width: 450px; border-radius: 10px; }
-       .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        th { background: #f8f9fa; color: var(--primary); padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-size: 14px; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 14px; color: #555; }
+        tr:hover { background: #fdfdfd; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Quản Lý Cửa Hàng Thời Trang</h1>
-    
-    <div class="nav-buttons">
-        <button class="btn-nav active" onclick="switchTab('nv')">Nhân Viên</button>
-        <button class="btn-nav" onclick="switchTab('sp')">Sản Phẩm</button>
-        <button class="btn-nav" onclick="switchTab('kh')">Khách Hàng</button>
-    </div>
-
-    <div id="section-nv" class="data-section">
-        <button class="btn-add" onclick="openModal('nv')">+ Thêm Nhân Viên</button>
-        <table id="table-nv">
-            <thead>
-                <tr><th>Mã NV</th><th>Họ Tên</th><th>Chức Vụ</th><th>SĐT</th><th>Thao Tác</th></tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <div id="section-sp" class="data-section" style="display:none;">
-        <button class="btn-add" onclick="openModal('sp')">+ Nhập Sản Phẩm</button>
-        <table id="table-sp">
-            <thead>
-                <tr><th>Mã SP</th><th>Tên Sản Phẩm</th><th>Loại</th><th>Giá Bán</th><th>Thao Tác</th></tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+<div class="sidebar">
+    <h2>Quản Lý Cửa Hàng</h2>
+    <div class="nav-item active" id="btn-sp" onclick="switchTab('sp')">Sản Phẩm</div>
+    <div class="nav-item" id="btn-nv" onclick="switchTab('nv')">Nhân Viên</div>
+    <div class="nav-item" id="btn-kh" onclick="switchTab('kh')">Khách Hàng</div>
+    <div class="nav-item" id="btn-hd" onclick="switchTab('hd')">Hóa Đơn</div>
 </div>
 
-<div id="formModal" class="modal">
-    <div class="modal-content">
-        <h2 id="modalTitle">Thêm Dữ Liệu</h2>
-        <form id="mainForm">
-            <div id="dynamicFields"></div>
-            <div style="text-align: right; margin-top: 20px;">
-                <button type="button" onclick="closeModal()">Đóng</button>
-                <button type="submit" style="background-color: var(--accent-color); color:white;">Xác Nhận</button>
-            </div>
-        </form>
+<div class="content">
+    <div class="card">
+        <h1 id="tab-title">Quản lý Sản Phẩm</h1>
+        
+        <div class="form-container" id="dynamic-form">
+            <div class="input-grid" id="input-fields"></div>
+            <button class="btn btn-add" id="main-add-btn" onclick="handleAddItem()">Thêm Dữ Liệu Mới</button>
+        </div>
+
+        <table id="main-table">
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+        </table>
     </div>
 </div>
 
 <script>
-// Dữ liệu mẫu khởi tạo dựa trên file SQL 
-const defaultData = {
-    nv:,
-    sp:
-};
+    // 1. Dữ liệu mặc định ban đầu
+    const defaultData = {
+        sp: [
+            { id: "SP01", name: "Áo Sơ Mi Trắng", type: "Áo", buy: 150000, sell: 250000, stock: 0 },
+            { id: "SP02", name: "Quần Jean Nam Xanh", type: "Quần", buy: 300000, sell: 550000, stock: 67 }
+        ],
+        nv: [
+            { id: "NV01", name: "Nguyễn Văn Anh", role: "Quản lý", phone: "0901234567", mail: "annv@gmail.com" },
+            { id: "NV02", name: "Nguyễn Phương Anh", role: "Bán hàng", phone: "0912345678", mail: "anhnp@gmail.com" }
+        ],
+        kh: [
+            { id: "KH01", name: "Nguyễn Thị Mai", phone: "0321456789", addr: "Hà Nội", gender: "Nữ" }
+        ],
+        hd: [
+            { id: "HD01", date: "2023-09-01", total: 400000, staff: "NV02", customer: "KH01" }
+        ]
+    };
 
-// Khởi tạo localStorage 
-function init() {
-    if(!localStorage.getItem('clothing_store_data')) {
-        localStorage.setItem('clothing_store_data', JSON.stringify(defaultData));
-    }
-    renderTable('nv');
-}
-
-function getData() {
-    return JSON.parse(localStorage.getItem('clothing_store_data'));
-}
-
-function saveData(data) {
-    localStorage.setItem('clothing_store_data', JSON.stringify(data));
-}
-
-function switchTab(tab) {
-    document.querySelectorAll('.data-section').forEach(s => s.style.display = 'none');
-    document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
-    document.getElementById('section-' + tab).style.display = 'block';
-    event.target.classList.add('active');
-    renderTable(tab);
-}
-
-function renderTable(tab) {
-    const data = getData()[tab];
-    const tbody = document.querySelector(`#table-${tab} tbody`);
-    if(!tbody) return;
-    tbody.innerHTML = '';
-    
-    data.forEach((item, index) => {
-        let row = `<tr>`;
-        Object.values(item).forEach(val => {
-            row += `<td>${typeof val === 'number'? val.toLocaleString() + 'đ' : val}</td>`;
-        });
-        row += `<td><button class="btn-delete" onclick="deleteItem('${tab}', ${index})">Xóa</button></td></tr>`;
-        tbody.innerHTML += row;
-    });
-}
-
-function openModal(type) {
-    const modal = document.getElementById('formModal');
-    const fields = document.getElementById('dynamicFields');
-    modal.dataset.type = type;
-    fields.innerHTML = '';
-    
-    if(type === 'nv') {
-        fields.innerHTML = `
-            <div class="form-group"><label>Mã NV</label><input id="inp-id" required></div>
-            <div class="form-group"><label>Tên NV</label><input id="inp-name" required></div>
-            <div class="form-group"><label>Chức Vụ</label><input id="inp-pos" required></div>
-            <div class="form-group"><label>SĐT</label><input id="inp-phone" required></div>
-        `;
-    } else if(type === 'sp') {
-        fields.innerHTML = `
-            <div class="form-group"><label>Mã SP</label><input id="inp-id" required></div>
-            <div class="form-group"><label>Tên SP</label><input id="inp-name" required></div>
-            <div class="form-group"><label>Loại SP</label><input id="inp-cat" required></div>
-            <div class="form-group"><label>Giá Bán</label><input type="number" id="inp-price" required></div>
-        `;
-    }
-    modal.style.display = 'block';
-}
-
-function closeModal() { document.getElementById('formModal').style.display = 'none'; }
-
-document.getElementById('mainForm').onsubmit = function(e) {
-    e.preventDefault();
-    const type = document.getElementById('formModal').dataset.type;
-    const allData = getData();
-    let newItem = {};
-
-    if(type === 'nv') {
-        newItem = {
-            id: document.getElementById('inp-id').value,
-            name: document.getElementById('inp-name').value,
-            pos: document.getElementById('inp-pos').value,
-            phone: document.getElementById('inp-phone').value
-        };
-    } else if(type === 'sp') {
-        newItem = {
-            id: document.getElementById('inp-id').value,
-            name: document.getElementById('inp-name').value,
-            cat: document.getElementById('inp-cat').value,
-            price: parseInt(document.getElementById('inp-price').value)
-        };
+    // 2. Hàm Load dữ liệu từ LocalStorage
+    function loadData() {
+        const savedData = localStorage.getItem('storeManagementData');
+        return savedData ? JSON.parse(savedData) : defaultData;
     }
 
-    // Kiểm tra trùng mã (Constraint) 
-    if(allData[type].some(x => x.id === newItem.id)) {
-        alert("Lỗi: Mã định danh đã tồn tại!");
-        return;
+    // 3. Hàm Lưu dữ liệu vào LocalStorage
+    function saveData() {
+        localStorage.setItem('storeManagementData', JSON.stringify(appData));
     }
 
-    allData[type].push(newItem);
-    saveData(allData);
-    closeModal();
-    renderTable(type);
-};
+    let appData = loadData();
+    let currentTab = 'sp';
 
-function deleteItem(type, index) {
-    if(confirm('Xác nhận xóa dữ liệu này?')) {
-        const allData = getData();
-        allData[type].splice(index, 1);
-        saveData(allData);
-        renderTable(type);
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('btn-' + tab).classList.add('active');
+        
+        const titles = {sp: "Sản Phẩm", nv: "Nhân Viên", kh: "Khách Hàng", hd: "Hóa Đơn"};
+        document.getElementById('tab-title').innerText = "Quản lý " + titles[tab];
+
+        renderForm();
+        renderTable();
     }
-}
 
-// Khởi động hệ thống
-init();
+    function renderForm() {
+        const grid = document.getElementById('input-fields');
+        const addBtn = document.getElementById('main-add-btn');
+        
+        if (currentTab === 'sp') {
+            grid.innerHTML = `
+                <input id="f1" placeholder="Mã SP (SP...)"> <input id="f2" placeholder="Tên Sản Phẩm">
+                <input id="f3" placeholder="Loại"> <input id="f4" type="number" placeholder="Giá Nhập">
+                <input id="f5" type="number" placeholder="Giá Bán"> <input id="f6" type="number" placeholder="Số lượng tồn">
+            `;
+            addBtn.innerText = " Thêm Sản Phẩm";
+        } else if (currentTab === 'nv') {
+            grid.innerHTML = `
+                <input id="f1" placeholder="Mã NV (NV...)"> <input id="f2" placeholder="Họ Tên">
+                <input id="f3" placeholder="Chức vụ"> <input id="f4" placeholder="Số điện thoại">
+                <input id="f5" placeholder="Email">
+            `;
+            addBtn.innerText = " Thêm Nhân Viên";
+        } else if (currentTab === 'kh') {
+            grid.innerHTML = `
+                <input id="f1" placeholder="Mã KH (KH...)"> <input id="f2" placeholder="Họ Tên">
+                <input id="f3" placeholder="Số điện thoại"> <input id="f4" placeholder="Địa chỉ">
+                <select id="f5"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select>
+            `;
+            addBtn.innerText = " Thêm Khách Hàng";
+        } else {
+            grid.innerHTML = `
+                <input id="f1" placeholder="Mã HĐ"> <input id="f2" type="date">
+                <input id="f3" type="number" placeholder="Tổng tiền"> <input id="f4" placeholder="Mã NV">
+                <input id="f5" placeholder="Mã KH">
+            `;
+            addBtn.innerText = " Tạo Hóa Đơn";
+        }
+    }
+
+    function renderTable() {
+        const head = document.getElementById('table-head');
+        const body = document.getElementById('table-body');
+        
+        let h = (currentTab==='sp') ? ["Mã", "Tên SP", "Loại", "Giá Nhập", "Giá Bán", "Tồn", "Thao tác"] :
+                (currentTab==='nv') ? ["Mã NV", "Tên NV", "Chức vụ", "SĐT", "Email", "Thao tác"] :
+                (currentTab==='kh') ? ["Mã KH", "Họ Tên", "SĐT", "Địa chỉ", "Giới tính", "Thao tác"] :
+                                      ["Mã HD", "Ngày tạo", "Thành tiền", "NV Lập", "Khách hàng", "Thao tác"];
+
+        head.innerHTML = `<tr>${h.map(title => `<th>${title}</th>`).join('')}</tr>`;
+        
+        body.innerHTML = appData[currentTab].map((item, index) => `
+            <tr>
+                ${Object.values(item).map(v => `<td>${typeof v === 'number' ? v.toLocaleString() : v}</td>`).join('')}
+                <td><button class="btn btn-del" onclick="handleDeleteItem(${index})">Xóa</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function handleAddItem() {
+        const inputs = [
+            document.getElementById('f1')?.value,
+            document.getElementById('f2')?.value,
+            document.getElementById('f3')?.value,
+            document.getElementById('f4')?.value,
+            document.getElementById('f5')?.value,
+            document.getElementById('f6')?.value
+        ];
+
+        if (!inputs[0] || !inputs[1]) {
+            alert("Vui lòng nhập ít nhất Mã định danh và Tên!");
+            return;
+        }
+
+        let newItem = {};
+        if (currentTab === 'sp') {
+            newItem = { id: inputs[0], name: inputs[1], type: inputs[2], buy: Number(inputs[3]), sell: Number(inputs[4]), stock: Number(inputs[5]) };
+        } else if (currentTab === 'nv') {
+            newItem = { id: inputs[0], name: inputs[1], role: inputs[2], phone: inputs[3], mail: inputs[4] };
+        } else if (currentTab === 'kh') {
+            newItem = { id: inputs[0], name: inputs[1], phone: inputs[2], addr: inputs[3], gender: inputs[4] };
+        } else {
+            newItem = { id: inputs[0], date: inputs[1], total: Number(inputs[2]), staff: inputs[3], customer: inputs[4] };
+        }
+
+        appData[currentTab].push(newItem);
+        
+        // LƯU DỮ LIỆU VÀ RENDER LẠI
+        saveData();
+        renderTable();
+        
+        // Reset form
+        document.querySelectorAll('.input-grid input').forEach(i => i.value = "");
+    }
+
+    function handleDeleteItem(index) {
+        if (confirm("Bạn có chắc chắn muốn xóa bản ghi này?")) {
+            appData[currentTab].splice(index, 1);
+            
+            // LƯU DỮ LIỆU VÀ RENDER LẠI
+            saveData();
+            renderTable();
+        }
+    }
+
+    // Khởi tạo trang lần đầu
+    switchTab('sp');
 </script>
 </body>
 </html>
