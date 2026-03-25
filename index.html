@@ -3,119 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cửa Hàng Quần Áo</title>
+    <title>Hệ Thống Quản Lý Cửa Hàng Quần Áo - Demo BTL</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        .form-group { margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
-        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; flex: 1; min-width: 150px; }
-        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #218838; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #007bff; color: white; }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        .btn-delete { background-color: #dc3545; }
-        .btn-delete:hover { background-color: #c82333; }
+        :root { --primary-color: #2c3e50; --secondary-color: #34495e; --accent-color: #27ae60; --danger-color: #e74c3c; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ecf0f1; margin: 0; padding: 20px; }
+       .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: var(--primary-color); text-transform: uppercase; }
+       .nav-buttons { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+       .btn-nav { background-color: var(--secondary-color); color: white; }
+       .btn-nav.active { background-color: var(--accent-color); }
+       .btn-add { background-color: var(--accent-color); color: white; margin-bottom: 15px; }
+       .btn-delete { background-color: var(--danger-color); color: white; padding: 5px 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #bdc3c7; padding: 12px; text-align: left; }
+        th { background-color: #f8f9fa; color: var(--primary-color); }
+       .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+       .modal-content { background: white; margin: 5% auto; padding: 25px; width: 450px; border-radius: 10px; }
+       .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Hệ Thống Quản Lý Kho Quần Áo</h2>
+    <h1>Quản Lý Cửa Hàng Thời Trang</h1>
     
-    <div class="form-group">
-        <input type="text" id="itemName" placeholder="Tên sản phẩm (VD: Áo thun Polo)">
-        <select id="itemCategory">
-            <option value="Áo">Áo</option>
-            <option value="Quần">Quần</option>
-            <option value="Váy">Váy</option>
-            <option value="Phụ kiện">Phụ kiện</option>
-        </select>
-        <input type="number" id="itemPrice" placeholder="Giá bán (VNĐ)">
-        <input type="number" id="itemStock" placeholder="Số lượng tồn kho">
-        <button onclick="addItem()">Thêm Sản Phẩm</button>
+    <div class="nav-buttons">
+        <button class="btn-nav active" onclick="switchTab('nv')">Nhân Viên</button>
+        <button class="btn-nav" onclick="switchTab('sp')">Sản Phẩm</button>
+        <button class="btn-nav" onclick="switchTab('kh')">Khách Hàng</button>
     </div>
 
-    <table id="inventoryTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Tên sản phẩm</th>
-                <th>Loại</th>
-                <th>Giá (VNĐ)</th>
-                <th>Tồn kho</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody id="inventoryBody">
-            <!-- Dữ liệu sẽ đổ vào đây -->
-        </tbody>
-    </table>
+    <div id="section-nv" class="data-section">
+        <button class="btn-add" onclick="openModal('nv')">+ Thêm Nhân Viên</button>
+        <table id="table-nv">
+            <thead>
+                <tr><th>Mã NV</th><th>Họ Tên</th><th>Chức Vụ</th><th>SĐT</th><th>Thao Tác</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="section-sp" class="data-section" style="display:none;">
+        <button class="btn-add" onclick="openModal('sp')">+ Nhập Sản Phẩm</button>
+        <table id="table-sp">
+            <thead>
+                <tr><th>Mã SP</th><th>Tên Sản Phẩm</th><th>Loại</th><th>Giá Bán</th><th>Thao Tác</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="formModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle">Thêm Dữ Liệu</h2>
+        <form id="mainForm">
+            <div id="dynamicFields"></div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button type="button" onclick="closeModal()">Đóng</button>
+                <button type="submit" style="background-color: var(--accent-color); color:white;">Xác Nhận</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
-    let inventory = JSON.parse(localStorage.getItem('clothing_db')) || [
-        { id: 1, name: 'Sơ mi trắng Slimfit', category: 'Áo', price: 250000, stock: 50 },
-        { id: 2, name: 'Quần Jean Denim', category: 'Quần', price: 450000, stock: 30 }
-    ];
+// Dữ liệu mẫu khởi tạo dựa trên file SQL 
+const defaultData = {
+    nv:,
+    sp:
+};
 
-    function renderTable() {
-        const tbody = document.getElementById('inventoryBody');
-        tbody.innerHTML = '';
-        inventory.forEach((item, index) => {
-            const row = `<tr>
-                <td>${item.id}</td>
-                <td>${item.name}</td>
-                <td>${item.category}</td>
-                <td>${item.price.toLocaleString()}</td>
-                <td>${item.stock}</td>
-                <td><button class="btn-delete" onclick="deleteItem(${index})">Xóa</button></td>
-            </tr>`;
-            tbody.innerHTML += row;
+// Khởi tạo localStorage 
+function init() {
+    if(!localStorage.getItem('clothing_store_data')) {
+        localStorage.setItem('clothing_store_data', JSON.stringify(defaultData));
+    }
+    renderTable('nv');
+}
+
+function getData() {
+    return JSON.parse(localStorage.getItem('clothing_store_data'));
+}
+
+function saveData(data) {
+    localStorage.setItem('clothing_store_data', JSON.stringify(data));
+}
+
+function switchTab(tab) {
+    document.querySelectorAll('.data-section').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-' + tab).style.display = 'block';
+    event.target.classList.add('active');
+    renderTable(tab);
+}
+
+function renderTable(tab) {
+    const data = getData()[tab];
+    const tbody = document.querySelector(`#table-${tab} tbody`);
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    
+    data.forEach((item, index) => {
+        let row = `<tr>`;
+        Object.values(item).forEach(val => {
+            row += `<td>${typeof val === 'number'? val.toLocaleString() + 'đ' : val}</td>`;
         });
-        localStorage.setItem('clothing_db', JSON.stringify(inventory));
+        row += `<td><button class="btn-delete" onclick="deleteItem('${tab}', ${index})">Xóa</button></td></tr>`;
+        tbody.innerHTML += row;
+    });
+}
+
+function openModal(type) {
+    const modal = document.getElementById('formModal');
+    const fields = document.getElementById('dynamicFields');
+    modal.dataset.type = type;
+    fields.innerHTML = '';
+    
+    if(type === 'nv') {
+        fields.innerHTML = `
+            <div class="form-group"><label>Mã NV</label><input id="inp-id" required></div>
+            <div class="form-group"><label>Tên NV</label><input id="inp-name" required></div>
+            <div class="form-group"><label>Chức Vụ</label><input id="inp-pos" required></div>
+            <div class="form-group"><label>SĐT</label><input id="inp-phone" required></div>
+        `;
+    } else if(type === 'sp') {
+        fields.innerHTML = `
+            <div class="form-group"><label>Mã SP</label><input id="inp-id" required></div>
+            <div class="form-group"><label>Tên SP</label><input id="inp-name" required></div>
+            <div class="form-group"><label>Loại SP</label><input id="inp-cat" required></div>
+            <div class="form-group"><label>Giá Bán</label><input type="number" id="inp-price" required></div>
+        `;
+    }
+    modal.style.display = 'block';
+}
+
+function closeModal() { document.getElementById('formModal').style.display = 'none'; }
+
+document.getElementById('mainForm').onsubmit = function(e) {
+    e.preventDefault();
+    const type = document.getElementById('formModal').dataset.type;
+    const allData = getData();
+    let newItem = {};
+
+    if(type === 'nv') {
+        newItem = {
+            id: document.getElementById('inp-id').value,
+            name: document.getElementById('inp-name').value,
+            pos: document.getElementById('inp-pos').value,
+            phone: document.getElementById('inp-phone').value
+        };
+    } else if(type === 'sp') {
+        newItem = {
+            id: document.getElementById('inp-id').value,
+            name: document.getElementById('inp-name').value,
+            cat: document.getElementById('inp-cat').value,
+            price: parseInt(document.getElementById('inp-price').value)
+        };
     }
 
-    function addItem() {
-        const name = document.getElementById('itemName').value;
-        const category = document.getElementById('itemCategory').value;
-        const price = document.getElementById('itemPrice').value;
-        const stock = document.getElementById('itemStock').value;
-
-        if (name && price && stock) {
-            const newItem = {
-                id: inventory.length > 0 ? inventory[inventory.length - 1].id + 1 : 1,
-                name,
-                category,
-                price: parseInt(price),
-                stock: parseInt(stock)
-            };
-            inventory.push(newItem);
-            renderTable();
-            clearInputs();
-        } else {
-            alert("Vui lòng nhập đầy đủ thông tin!");
-        }
+    // Kiểm tra trùng mã (Constraint) 
+    if(allData[type].some(x => x.id === newItem.id)) {
+        alert("Lỗi: Mã định danh đã tồn tại!");
+        return;
     }
 
-    function deleteItem(index) {
-        if(confirm("Xác nhận xóa sản phẩm này?")) {
-            inventory.splice(index, 1);
-            renderTable();
-        }
-    }
+    allData[type].push(newItem);
+    saveData(allData);
+    closeModal();
+    renderTable(type);
+};
 
-    function clearInputs() {
-        document.getElementById('itemName').value = '';
-        document.getElementById('itemPrice').value = '';
-        document.getElementById('itemStock').value = '';
+function deleteItem(type, index) {
+    if(confirm('Xác nhận xóa dữ liệu này?')) {
+        const allData = getData();
+        allData[type].splice(index, 1);
+        saveData(allData);
+        renderTable(type);
     }
+}
 
-    // Khởi tạo bảng lần đầu
-    renderTable();
+// Khởi động hệ thống
+init();
 </script>
-
 </body>
 </html>
