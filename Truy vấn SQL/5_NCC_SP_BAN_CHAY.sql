@@ -1,0 +1,11 @@
+--Đưa ra top3 nhà cung cấp có sản phẩm được bán nhiều nhất
+
+SELECT TOP(3) NCC.TenNCC, 
+SUM(CTHD.SoLuong) AS TongSoDaBan
+FROM NHACUNGCAP NCC JOIN SANPHAM SP 
+ON NCC.MaNCC = SP.MaNCC
+
+JOIN CHITIET_HOADON CTHD
+ON SP.MaSP = CTHD.MaSP
+GROUP BY NCC.MaNCC, NCC.TenNCC
+ORDER BY TongSoDaBan DESC;
