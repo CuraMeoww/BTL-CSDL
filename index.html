@@ -4,55 +4,110 @@
     <meta charset="UTF-8">
     <title>Hệ Thống Quản Lý Cửa Hàng - SQL Cloud</title>
     <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --danger: #e74c3c; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; display: flex; background: #f4f7f6; height: 100vh; }
+        :root { 
+            /* Bộ mã màu ông yêu cầu */
+            --primary-light: #ff91a4; 
+            --primary-main: #fc8eac;
+            
+            /* Phối màu thông minh để chữ rõ nét */
+            --sidebar-bg: #2d3436;    /* Xám chì đậm giúp Sidebar sang và làm nổi bật màu hồng */
+            --body-bg: #fffafa;       /* Trắng hồng cực nhẹ để dịu mắt */
+            --card-bg: #ffffff;
+            --text-main: #2d3436;     /* Chữ màu đậm để đọc rõ trên nền sáng */
+            
+            /* Màu chức năng */
+            --success: #55efc4;       /* Xanh bạc hà dịu */
+            --danger: #ff7675;        /* Đỏ san hô */
+            --warning: #ffeaa7;       /* Vàng kem cho nút sửa */
+            --accent: var(--primary-main);
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            display: flex; 
+            background: var(--body-bg); 
+            height: 100vh; 
+            color: var(--text-main);
+        }
         
         /* Sidebar */
-        .sidebar { width: 260px; background: var(--primary); color: white; display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
-        .sidebar h2 { padding: 25px; text-align: center; background: #1a252f; margin: 0; font-size: 1.2em; text-transform: uppercase; letter-spacing: 1px; }
-        .nav-item { padding: 18px 25px; cursor: pointer; transition: 0.3s; border-left: 5px solid transparent; display: flex; align-items: center; gap: 10px; }
-        .nav-item:hover, .nav-item.active { background: #34495e; border-left: 5px solid var(--accent); }
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar h2 { padding: 25px; text-align: center; background: #1e272e; margin: 0; font-size: 1.1em; text-transform: uppercase; letter-spacing: 2px; color: var(--primary-light); }
+        
+        .nav-item { padding: 18px 25px; cursor: pointer; transition: 0.3s; border-left: 5px solid transparent; display: flex; align-items: center; gap: 10px; color: #b2bec3; }
+        .nav-item:hover { background: #3d4849; color: var(--primary-light); }
+        .nav-item.active { background: #3d4849; border-left: 5px solid var(--primary-main); color: var(--primary-main); font-weight: bold; }
+        
+        .role-switch { margin-top: auto; padding: 20px; background: #1e272e; text-align: center; }
 
         /* Main Content */
         .content { flex: 1; padding: 30px; overflow-y: auto; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { margin-top: 0; color: #2c3e50; font-size: 1.5em; border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(252,142,172,0.1); border: 1px solid #ffeef1; }
+        
+        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-light); margin-bottom: 25px; padding-bottom: 15px; }
+        h1 { margin: 0; color: var(--sidebar-bg); font-size: 1.6em; }
 
         /* Form Nhập liệu */
-        .form-container { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #eee; }
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
-        input:focus { border-color: var(--accent); }
+        .form-container { background: #fffcfd; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #ffebf0; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
         
+        input { padding: 12px; border: 1px solid #ffd1dc; border-radius: 8px; outline: none; transition: 0.3s; background: white; color: var(--text-main); }
+        input:focus { border-color: var(--primary-main); box-shadow: 0 0 8px rgba(252,142,172,0.2); }
+        input::placeholder { color: #b2bec3; }
+
         /* Nút bấm */
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
-        .btn-add { background: var(--success); }
-        .btn-del { background: var(--danger); padding: 5px 10px; font-size: 12px; }
-        .btn:hover { opacity: 0.8; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-add { background: var(--primary-main); color: white; box-shadow: 0 4px 10px rgba(252,142,172,0.3); }
+        .btn-add:hover { background: var(--primary-light); transform: translateY(-2px); }
+        
+        .btn-edit { background: var(--warning); color: #634e00; padding: 6px 12px; font-size: 12px; margin-right: 5px; }
+        .btn-del { background: var(--danger); color: white; padding: 6px 12px; font-size: 12px; }
+        .btn:hover { opacity: 0.9; }
+        
+        .btn-role { background: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); width: 100%; }
+        .btn-role:hover { background: var(--primary-main); color: white; }
 
         /* Bảng */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: #f8f9fa; color: var(--primary); padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-size: 14px; }
-        td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 14px; color: #555; }
-        tr:hover { background: #fdfdfd; }
+        th { background: #fff5f7; color: var(--text-main); padding: 15px; text-align: left; border-bottom: 2px solid var(--primary-light); font-size: 14px; text-transform: uppercase; }
+        td { padding: 14px 15px; border-bottom: 1px solid #fff0f3; font-size: 14px; color: #444; }
+        tr:hover { background: #fffcfd; }
+        
+        .badge-admin { background: var(--primary-main); color: white; padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; }
+        
+        /* Search Box */
+        .search-box { position: relative; display: flex; align-items: center; gap: 15px; }
+        #search-input { border: 2px solid #ffe0e6; width: 280px; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2>Quản Lý Cửa Hàng</h2>
+    <h2>Shop Management</h2>
     <div class="nav-item active" id="btn-sp" onclick="switchTab('sp')">Sản Phẩm</div>
     <div class="nav-item" id="btn-nv" onclick="switchTab('nv')">Nhân Viên</div>
     <div class="nav-item" id="btn-kh" onclick="switchTab('kh')">Khách Hàng</div>
     <div class="nav-item" id="btn-hd" onclick="switchTab('hd')">Hóa Đơn</div>
+    <div class="role-switch">
+        <p id="role-text" style="font-size: 12px; margin-bottom: 10px; color: #b2bec3;">Quyền: Nhân Viên</p>
+        <button class="btn btn-role" onclick="toggleRole()">Đổi Quyền Admin</button>
+    </div>
 </div>
 
 <div class="content">
     <div class="card">
-        <h1 id="tab-title">Quản lý Sản Phẩm</h1>
-        <div class="form-container" id="dynamic-form">
+        <div class="header-flex">
+            <h1 id="tab-title">Quản lý Sản Phẩm</h1>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Tìm kiếm nhanh..." onkeyup="handleSearch()">
+                <span id="admin-badge"></span>
+            </div>
+        </div>
+        <div class="form-container" id="form-section" style="display: none;">
             <div class="input-grid" id="input-fields"></div>
-            <button class="btn btn-add" id="main-add-btn" onclick="handleAddItem()">Thêm Mới</button>
+            <button class="btn btn-add" id="main-btn" onclick="handleAction()">Thêm Mới</button>
+            <button class="btn" style="background:#b2bec3; color: white; margin-left: 10px; display:none;" id="cancel-btn" onclick="resetForm()">Hủy</button>
         </div>
         <table id="main-table">
             <thead id="table-head"></thead>
@@ -62,134 +117,178 @@
 </div>
 
 <script>
-    const API_URL = "https://super-duper-goggles-r4jw6xxgj7952pp56-5000.app.github.dev";
+    const API_URL = window.location.origin; 
     let appData = { sp: [], nv: [], kh: [], hd: [] };
     let currentTab = 'sp';
+    let isAdmin = false;
+    let editId = null;
+
+    function toggleRole() {
+        if (!isAdmin) {
+            let pass = prompt("Nhập mã Admin (123):");
+            if (pass === "123") {
+                isAdmin = true;
+                document.getElementById('role-text').innerText = "Quyền: Quản Trị Viên";
+                document.getElementById('role-text').style.color = "var(--primary-main)";
+                document.getElementById('admin-badge').innerHTML = '<span class="badge-admin">ADMIN MODE</span>';
+            } else { alert("Sai mã!"); }
+        } else {
+            isAdmin = false;
+            document.getElementById('role-text').innerText = "Quyền: Nhân Viên";
+            document.getElementById('role-text').style.color = "#b2bec3";
+            document.getElementById('admin-badge').innerHTML = '';
+        }
+        renderForm();
+        renderTable();
+    }
 
     async function fetchData() {
         try {
             const response = await fetch(`${API_URL}/api/${currentTab}`);
-            if (!response.ok) throw new Error("Lỗi fetch");
             const data = await response.json();
-            
-            if (currentTab === 'sp') {
-                appData.sp = data.map(i => ({ id: i.MaSP, name: i.TenSP, type: i.LoaiSP, buy: i.GiaNhap, sell: i.GiaBan, stock: i.SoLuongTon }));
-            } else if (currentTab === 'nv') {
-                appData.nv = data.map(i => ({ id: i.MaNV, name: i.TenNV, phone: i.SDTNV, role: i.ChucVu, email: i.eMail }));
-            } else if (currentTab === 'kh') {
-                appData.kh = data.map(i => ({ id: i.MaKH, name: i.TenKH, phone: i.SDTKH, address: i.DiaChi, gender: i.GioiTinh }));
-            } else if (currentTab === 'hd') {
-                appData.hd = data.map(i => {
-                    // Tự động tìm cột Ngày và cột Tiền dựa trên từ khóa trong SQL của bạn
-                    let keyNgay = Object.keys(i).find(k => k.toLowerCase().includes('ngay')) || "NgayLap";
-                    let keyTien = Object.keys(i).find(k => k.toLowerCase().includes('tien') || k.toLowerCase().includes('gia')) || "TongTien";
-
-                    return { 
-                        id: i.MaHD || i.mahd || "N/A", 
-                        date: i[keyNgay] ? i[keyNgay].toString().slice(0, 10) : "N/A", 
-                        total: i[keyTien] !== undefined ? i[keyTien] : 0, 
-                        staff: i.MaNV || i.manv || "", 
-                        customer: i.MaKH || i.makh || "" 
-                    };
-                });
-            }
+            appData[currentTab] = data; 
             renderTable();
-        } catch (error) {
-            console.error(error);
-            document.getElementById('table-body').innerHTML = `<tr><td colspan="10" style="color:red; text-align:center">Lỗi kết nối Server!</td></tr>`;
+        } catch (e) { console.error(e); }
+    }
+
+    function handleSearch() {
+        const keyword = document.getElementById('search-input').value.toLowerCase();
+        const filteredData = appData[currentTab].filter(item => {
+            return Object.values(item).some(val => 
+                String(val).toLowerCase().includes(keyword)
+            );
+        });
+        renderTable(filteredData);
+    }
+
+    function renderForm() {
+        const formSec = document.getElementById('form-section');
+        formSec.style.display = isAdmin ? "block" : "none";
+        const grid = document.getElementById('input-fields');
+        
+        if (currentTab === 'sp') {
+            grid.innerHTML = `
+                <input id="i1" placeholder="Mã SP"> <input id="i2" placeholder="Tên SP">
+                <input id="i3" placeholder="Loại SP"> <input id="i4" type="number" placeholder="Giá Nhập">
+                <input id="i5" type="number" placeholder="Giá Bán"> <input id="i6" type="number" placeholder="Tồn Kho">
+                <input id="i7" placeholder="Xuất xứ"> <input id="i8" placeholder="Mã NCC">`;
+        } else if (currentTab === 'nv') {
+            grid.innerHTML = `
+                <input id="i1" placeholder="Mã NV"> <input id="i2" placeholder="Họ Tên">
+                <input id="i3" placeholder="SĐT"> <input id="i4" placeholder="Chức vụ">
+                <input id="i5" placeholder="Giới tính"> <input id="i6" placeholder="Email">
+                <input id="i7" placeholder="Ngày vào (YYYY-MM-DD)"> <input id="i8" placeholder="Mã Lương (L01-L15)">`;
+        } else if (currentTab === 'kh') {
+            grid.innerHTML = `
+                <input id="i1" placeholder="Mã KH"> <input id="i2" placeholder="Họ Tên">
+                <input id="i3" placeholder="SĐT"> <input id="i4" placeholder="Địa chỉ">
+                <input id="i5" placeholder="Ngày sinh"> <input id="i6" placeholder="Giới tính">
+                <input id="i7" placeholder="Mã NV quản lý">`;
+        } else if (currentTab === 'hd') {
+            grid.innerHTML = `
+                <input id="i1" placeholder="Mã HD"> <input id="i2" placeholder="Ngày tạo">
+                <input id="i3" type="number" placeholder="Thành tiền"> <input id="i4" type="number" placeholder="Tiền thừa">
+                <input id="i5" placeholder="Mã NV"> <input id="i6" placeholder="Mã KH">`;
+        }
+    }
+
+    function renderTable(customData = null) {
+        const head = document.getElementById('table-head');
+        const body = document.getElementById('table-body');
+        const data = customData || appData[currentTab];
+        
+        if (!data || data.length === 0) { 
+            body.innerHTML = "<tr><td colspan='20' style='text-align:center'>Không tìm thấy dữ liệu</td></tr>"; 
+            return; 
+        }
+
+        const cols = Object.keys(data[0]);
+        head.innerHTML = `<tr>${cols.map(c => `<th>${c}</th>`).join('')} ${isAdmin ? '<th>Thao tác</th>' : ''}</tr>`;
+        
+        body.innerHTML = data.map(item => `
+            <tr>
+                ${cols.map(c => {
+                    let v = item[c];
+                    let displayValue = (v === 0) ? "0" : (v || "");
+                    if (typeof v === 'number' && (c.toLowerCase().includes('gia') || c.toLowerCase().includes('tien'))) {
+                        displayValue = v.toLocaleString() + " VNĐ";
+                    }
+                    return `<td>${displayValue}</td>`;
+                }).join('')}
+                ${isAdmin ? `<td>
+                    <button class="btn btn-edit" onclick="prepareEdit('${Object.values(item)[0]}')">Sửa</button>
+                    <button class="btn btn-del" onclick="handleDeleteItem('${Object.values(item)[0]}')">Xóa</button>
+                </td>` : ""}
+            </tr>`).join('');
+    }
+
+    function prepareEdit(id) {
+        editId = id;
+        const item = appData[currentTab].find(i => Object.values(i)[0] === id);
+        Object.values(item).forEach((val, idx) => {
+            const input = document.getElementById(`i${idx+1}`);
+            if(input) {
+                input.value = val;
+                input.readOnly = false; 
+            }
+        });
+        document.getElementById('main-btn').innerText = "Xác Nhận Sửa";
+        document.getElementById('main-btn').style.background = "var(--primary-main)";
+        document.getElementById('cancel-btn').style.display = "inline-block";
+        window.scrollTo(0,0);
+    }
+
+    function resetForm() {
+        editId = null;
+        document.getElementById('main-btn').innerText = "Thêm Mới";
+        document.getElementById('main-btn').style.background = "var(--primary-main)";
+        document.getElementById('cancel-btn').style.display = "none";
+        document.querySelectorAll('input').forEach(i => {
+            if(i.id !== 'search-input') {
+                i.value = "";
+                i.readOnly = false;
+            }
+        });
+    }
+
+    async function handleAction() {
+        const v = [1,2,3,4,5,6,7,8].map(n => document.getElementById(`i${n}`)?.value);
+        let payload = {};
+        if (currentTab === 'sp') payload = { MaSP: v[0], TenSP: v[1], LoaiSP: v[2], GiaNhap: Number(v[3]), GiaBan: Number(v[4]), SoLuongTon: Number(v[5]), XuatXu: v[6], MaNCC: v[7] };
+        else if (currentTab === 'nv') payload = { MaNV: v[0], TenNV: v[1], SDTNV: v[2], ChucVu: v[3], GioiTinh: v[4], eMail: v[5], NgayVaoLam: v[6], MaLuong: v[7] };
+        else if (currentTab === 'kh') payload = { MaKH: v[0], TenKH: v[1], SDTKH: v[2], DiaChi: v[3], NgaySinh: v[4], GioiTinh: v[5], MaNV: v[6] };
+        else if (currentTab === 'hd') payload = { MaHD: v[0], NgayTao: v[1], ThanhTien: Number(v[2]), TienThua: Number(v[3]), MaNV: v[4], MaKH: v[5] };
+
+        const method = editId ? 'PUT' : 'POST';
+        const url = editId ? `${API_URL}/api/${currentTab}/${editId}` : `${API_URL}/api/${currentTab}`;
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) { resetForm(); fetchData(); } 
+            else { const err = await res.json(); alert("Lỗi: " + err.error); }
+        } catch (error) { alert("Lỗi kết nối Server!"); }
+    }
+
+    async function handleDeleteItem(id) {
+        if (confirm("Xóa dòng này?")) {
+            await fetch(`${API_URL}/api/${currentTab}/${id}`, { method: 'DELETE' });
+            fetchData();
         }
     }
 
     function switchTab(tab) {
         currentTab = tab;
+        document.getElementById('search-input').value = ""; 
+        resetForm();
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById('btn-' + tab).classList.add('active');
-        const titles = {sp: "Sản Phẩm", nv: "Nhân Viên", kh: "Khách Hàng", hd: "Hóa Đơn"};
-        document.getElementById('tab-title').innerText = "Quản lý " + titles[tab];
+        document.getElementById('tab-title').innerText = "Quản lý " + {sp:"Sản Phẩm", nv:"Nhân Viên", kh:"Khách Hàng", hd:"Hóa Đơn"}[tab];
         renderForm();
         fetchData();
-    }
-
-    function renderForm() {
-        const grid = document.getElementById('input-fields');
-        if (currentTab === 'sp') {
-            grid.innerHTML = `
-                <input id="i1" placeholder="Mã SP"> <input id="i2" placeholder="Tên SP">
-                <input id="i3" placeholder="Loại"> <input id="i4" type="number" placeholder="Giá Nhập">
-                <input id="i5" type="number" placeholder="Giá Bán"> <input id="i6" type="number" placeholder="Tồn">`;
-        } else if (currentTab === 'nv') {
-            grid.innerHTML = `
-                <input id="i1" placeholder="Mã NV"> <input id="i2" placeholder="Họ Tên">
-                <input id="i3" placeholder="SĐT"> <input id="i4" placeholder="Chức vụ">
-                <input id="i5" placeholder="Email">`;
-        } else if (currentTab === 'kh') {
-            grid.innerHTML = `
-                <input id="i1" placeholder="Mã KH"> <input id="i2" placeholder="Họ Tên">
-                <input id="i3" placeholder="SĐT"> <input id="i4" placeholder="Địa chỉ">
-                <input id="i5" placeholder="Giới tính">`;
-        } else if (currentTab === 'hd') {
-            grid.innerHTML = `
-                <input id="i1" placeholder="Mã HD"> <input id="i2" type="date">
-                <input id="i3" type="number" placeholder="Tổng tiền"> <input id="i4" placeholder="Mã NV">
-                <input id="i5" placeholder="Mã KH">`;
-        }
-    }
-
-    function renderTable() {
-        const head = document.getElementById('table-head');
-        const body = document.getElementById('table-body');
-        let headers = [];
-        
-        if (currentTab === 'sp') headers = ["Mã SP", "Tên SP", "Loại", "Giá Nhập", "Giá Bán", "Tồn", "Thao tác"];
-        else if (currentTab === 'nv') headers = ["Mã NV", "Họ Tên", "SĐT", "Chức vụ", "Email", "Thao tác"];
-        else if (currentTab === 'kh') headers = ["Mã KH", "Họ Tên", "SĐT", "Địa chỉ", "Giới tính", "Thao tác"];
-        else if (currentTab === 'hd') headers = ["Mã HD", "Ngày lập", "Tổng tiền", "Mã NV", "Mã KH", "Thao tác"];
-        
-        head.innerHTML = `<tr>${headers.map(t => `<th>${t}</th>`).join('')}</tr>`;
-        
-        if (appData[currentTab].length === 0) {
-            body.innerHTML = `<tr><td colspan="${headers.length}" style="text-align:center; padding:20px;">Không có dữ liệu.</td></tr>`;
-            return;
-        }
-
-        body.innerHTML = appData[currentTab].map(item => `
-            <tr>
-                ${Object.entries(item).map(([key, v]) => {
-                    // FIX LỖI SỐ 0: Hiển thị 0 nếu giá trị là 0, còn rỗng/null thì hiện trống
-                    let displayValue = (v !== undefined && v !== null && v !== "") ? v : (v === 0 ? "0" : "");
-                    
-                    if (key === 'total' && typeof v === 'number') {
-                        return `<td>${v.toLocaleString()} VNĐ</td>`;
-                    }
-                    return `<td>${displayValue}</td>`;
-                }).join('')}
-                <td><button class="btn btn-del" onclick="handleDeleteItem('${item.id}')">Xóa</button></td>
-            </tr>`).join('');
-    }
-
-    async function handleAddItem() {
-        const vals = [1,2,3,4,5,6].map(n => document.getElementById(`i${n}`)?.value);
-        let payload = {};
-        
-        if (currentTab === 'sp') payload = { MaSP: vals[0], TenSP: vals[1], LoaiSP: vals[2], GiaNhap: Number(vals[3]), GiaBan: Number(vals[4]), SoLuongTon: Number(vals[5]) };
-        else if (currentTab === 'nv') payload = { MaNV: vals[0], TenNV: vals[1], SDTNV: vals[2], ChucVu: vals[3], eMail: vals[4] };
-        else if (currentTab === 'kh') payload = { MaKH: vals[0], TenKH: vals[1], SDTKH: vals[2], DiaChi: vals[3], GioiTinh: vals[4] };
-        else if (currentTab === 'hd') payload = { MaHD: vals[0], NgayLap: vals[1], TongTien: Number(vals[2]), MaNV: vals[3], MaKH: vals[4] };
-
-        await fetch(`${API_URL}/api/${currentTab}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        fetchData();
-        document.querySelectorAll('input').forEach(i => i.value = "");
-    }
-
-    async function handleDeleteItem(id) {
-        if (confirm("Xác nhận xóa khỏi hệ thống?")) {
-            await fetch(`${API_URL}/api/${currentTab}/${id}`, { method: 'DELETE' });
-            fetchData();
-        }
     }
 
     window.onload = () => switchTab('sp');
