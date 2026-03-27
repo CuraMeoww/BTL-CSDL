@@ -8,6 +8,10 @@
 
 ---
 
+## SLIDE
+🔗 [Slide BTL](https://www.canva.com/design/DAHFCsD_zmA/vraCPVZcKotr79UhNFNh-A/edit?utm_content=DAHFCsD_zmA&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+---
+
 ## 🌐 Web Demo
 Xem trực tiếp giao diện quản lý dữ liệu tại:  
 🔗 [Hệ thống Quản lý Cửa hàng](https://super-duper-goggles-r4jw6xxgj7952pp56-5000.app.github.dev/)
